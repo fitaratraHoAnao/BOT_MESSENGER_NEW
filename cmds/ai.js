@@ -1,23 +1,24 @@
 const axios = require('axios');
-const sendMessage = require('../handles/sendMessage');
 
 module.exports = {
     onStart: async (sender_psid, message) => {
+        const sendMessage = require('../handles/sendMessage');
+        const uid = sender_psid; // Utiliser l'ID utilisateur pour conserver le contexte
+        const userMessage = encodeURIComponent(message.text); // Encodage de la question
+
         try {
-            const userMessage = encodeURIComponent(message.text);
-            const uid = sender_psid; // Utiliser sender_psid comme UID pour la conversation continue
+            const response = await axios.get(`https://api-test-one-brown.vercel.app/llama?question=${userMessage}&uid=${uid}`);
+            console.log("Réponse API:", response.data); // Debugging
 
-            const apiUrl = `https://api-test-one-brown.vercel.app/llama?question=${userMessage}&uid=${uid}`;
-            const response = await axios.get(apiUrl);
-
-            if (response.data && response.data.answer) {
-                sendMessage(sender_psid, response.data.answer);
+            // Vérifier que la réponse contient bien une clé 'response'
+            if (response.data && typeof response.data.response === 'string') {
+                sendMessage(sender_psid, response.data.response);
             } else {
-                sendMessage(sender_psid, "Je n'ai pas pu obtenir de réponse.");
+                sendMessage(sender_psid, "Je n'ai pas pu obtenir de réponse valide.");
             }
         } catch (error) {
-            console.error("Erreur lors de l'appel à l'API AI:", error);
-            sendMessage(sender_psid, "Une erreur est survenue, réessayez plus tard.");
+            console.error("Erreur lors de l'appel API:", error.message);
+            sendMessage(sender_psid, "Une erreur est survenue lors de la communication avec l'IA.");
         }
     }
 };
