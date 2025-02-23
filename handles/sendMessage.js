@@ -14,7 +14,7 @@ module.exports = (sender_psid, response) => {
         json: request_body
     }, (err, res, body) => {
         if (err) {
-            console.error('Erreur lors de l'envoi du message:', err);
+            console.error(`Erreur lors de l'envoi du message: ${err}`);
         }
     });
 };
