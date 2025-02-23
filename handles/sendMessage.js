@@ -1,11 +1,22 @@
-// handles/sendMessage.js
 const request = require('request');
 
-module.exports = (sender_psid, response) => {
+module.exports = (sender_psid, response, quickReplies = null) => {
     let request_body = {
         recipient: { id: sender_psid },
-        message: { text: response }
+        message: {}
     };
+
+    // Vérifie si on doit envoyer des boutons Quick Replies
+    if (quickReplies && Array.isArray(quickReplies)) {
+        request_body.message.text = response;
+        request_body.message.quick_replies = quickReplies.map(title => ({
+            content_type: "text",
+            title: title,
+            payload: title.toUpperCase().replace(/\s/g, "_") // Convertir en format payload
+        }));
+    } else {
+        request_body.message.text = response;
+    }
 
     request({
         uri: 'https://graph.facebook.com/v12.0/me/messages',
