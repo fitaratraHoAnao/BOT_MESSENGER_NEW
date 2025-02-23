@@ -11,7 +11,7 @@ fs.readdirSync(path.join(__dirname, '../cmds')).forEach(file => {
     if (command.command) {
         commands[command.command.toLowerCase()] = command;
     } else if (command.onStart) {
-        commands['ai'] = command; // AI se déclenche sur tout message si rien n'est actif
+        commands['onstart'] = command; // Associer la commande qui contient onStart
     }
 });
 
@@ -25,7 +25,7 @@ module.exports = (sender_psid, message) => {
         return sendMessage(sender_psid, `La commande ${activeCommand} a été désactivée avec succès.`);
     }
 
-    // Vérifier d'abord si le message est une commande connue
+    // Vérifier si le message correspond à une commande connue
     for (let cmd in commands) {
         if (text.startsWith(cmd)) {
             userSessions[sender_psid] = cmd; // Activer la commande
@@ -40,9 +40,9 @@ module.exports = (sender_psid, message) => {
         return commands[activeCommand].execute(sender_psid, message);
     }
 
-    // Si aucune commande spécifique n'est détectée, exécuter AI si disponible
-    if (commands['ai'] && commands['ai'].onStart) {
-        return commands['ai'].onStart(sender_psid, message);
+    // Si aucune commande n'est active, utiliser la commande contenant onStart
+    if (commands['onstart'] && commands['onstart'].onStart) {
+        return commands['onstart'].onStart(sender_psid, message);
     }
 
     // Réponse par défaut si aucun traitement n'est applicable
