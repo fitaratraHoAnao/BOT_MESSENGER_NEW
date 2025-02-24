@@ -1,4 +1,6 @@
 const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
 const sendMessage = require('../handles/sendMessage');
 
 module.exports = {
@@ -12,7 +14,23 @@ module.exports = {
             
             if (response.data.message === "Fichier trouvé.") {
                 const pdfUrl = response.data.url;
-                sendMessage(sender_psid, `Voici votre fichier PDF : ${pdfUrl}`);
+                const pdfPath = path.join(__dirname, `${userInput}.pdf`);
+                
+                // Télécharger le fichier PDF
+                const pdfResponse = await axios({
+                    url: pdfUrl,
+                    method: 'GET',
+                    responseType: 'stream'
+                });
+                
+                const writer = fs.createWriteStream(pdfPath);
+                pdfResponse.data.pipe(writer);
+                
+                writer.on('finish', () => {
+                    sendMessage(sender_psid, { attachment: { type: 'file', payload: { url: pdfPath } } });
+                    // Supprimer le fichier après l'envoi
+                    setTimeout(() => fs.unlinkSync(pdfPath), 10000);
+                });
             } else {
                 sendMessage(sender_psid, "Désolé, le fichier demandé n'a pas été trouvé.");
             }
