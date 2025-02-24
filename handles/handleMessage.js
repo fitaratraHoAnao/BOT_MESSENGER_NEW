@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const sendMessage = require('./sendMessage');
-const handlePostback = require('./handlePostback');
+
 const userSessions = {}; // Stocke l'état des utilisateurs
 
 // Charger dynamiquement les commandes depuis le dossier cmds/
@@ -18,8 +18,8 @@ fs.readdirSync(path.join(__dirname, '../cmds')).forEach(file => {
 module.exports = (sender_psid, message) => {
     const text = message.text.toLowerCase().trim();
 
-    // Autoriser toujours la commande "help"
-    if (text === "help" && commands["help"]) {
+    // Vérifier si le message commence par "help" (ex: "help", "help 2", "help 3", etc.)
+    if (text.startsWith("help") && commands["help"]) {
         return commands["help"].execute(sender_psid, message);
     }
 
@@ -33,7 +33,7 @@ module.exports = (sender_psid, message) => {
     // Vérifier si le message correspond à une commande connue
     for (let cmd in commands) {
         if (text.startsWith(cmd)) {
-            userSessions[sender_psid] = cmd; // Activer la nouvelle commande (écrase l'ancienne)
+            userSessions[sender_psid] = cmd; // Activer la nouvelle commande (remplace l'ancienne)
             sendMessage(sender_psid, `La commande ${cmd} est activée.`);
             return commands[cmd].execute(sender_psid, message);
         }
