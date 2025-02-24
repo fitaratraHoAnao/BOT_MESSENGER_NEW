@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const sendMessage = require('./sendMessage');
-
+const handlePostback = require('./handlePostback');
 const userSessions = {}; // Stocke l'état des utilisateurs
 
 // Charger dynamiquement les commandes depuis le dossier cmds/
