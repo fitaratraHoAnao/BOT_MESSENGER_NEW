@@ -1,3 +1,5 @@
+const handleMessage = require('./handleMessage');
+const handlePostback = require('./handlePostback');
 const request = require('request');
 
 module.exports = (sender_psid, response, quickReplies = null) => {
