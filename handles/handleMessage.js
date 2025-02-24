@@ -1,3 +1,20 @@
+const fs = require('fs');
+const path = require('path');
+const sendMessage = require('./sendMessage');
+
+const userSessions = {}; // Stocke l'état des utilisateurs
+
+// Charger dynamiquement les commandes depuis le dossier cmds/
+const commands = {};
+fs.readdirSync(path.join(__dirname, '../cmds')).forEach(file => {
+    const command = require(`../cmds/${file}`);
+    if (command.command) {
+        commands[command.command.toLowerCase()] = command;
+    } else if (command.onStart) {
+        commands['onstart'] = command; // Associer la commande qui contient onStart
+    }
+});
+
 module.exports = (sender_psid, message) => {
     const text = message.text.toLowerCase().trim();
 
